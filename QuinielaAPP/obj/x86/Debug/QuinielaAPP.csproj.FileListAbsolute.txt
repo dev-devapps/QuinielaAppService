@@ -1,0 +1,12 @@
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/QuinielaAPP.exe.config
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/QuinielaAPP.exe
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/QuinielaAPP.pdb
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/EntityFramework.dll
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/EntityFramework.SqlServer.dll
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/System.Data.SqlClient.dll
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/EntityFramework.xml
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/bin/Debug/EntityFramework.SqlServer.xml
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/obj/x86/Debug/QuinielaAPP.csproj.CoreCompileInputs.cache
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/obj/x86/Debug/QuinielaAPP.exe
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/obj/x86/Debug/QuinielaAPP.pdb
+/Users/alfredo/Documents/DevApps/APP/QuinielaAPP/QuinielaAPP/obj/x86/Debug/QuinielaAPP.csprojResolveAssemblyReference.cache
