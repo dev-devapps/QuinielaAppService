@@ -63,7 +63,7 @@ namespace QuinielaAPP
 
                                 htmlCuerpoCorreo = ArmaHTMLPronostico(idPartido, equipo1, equipo2);
 
-                                //EnvioCorreo("Pronosticos " + equipo1 + " vs. " + equipo2, htmlCuerpoCorreo);
+                                EnvioCorreo("Pronosticos " + equipo1 + " vs. " + equipo2, htmlCuerpoCorreo);
                             }
                         }
                     }
@@ -173,7 +173,7 @@ namespace QuinielaAPP
 
                                 htmlCuerpoCorreo = ArmaHTMLRanking();
 
-                                //EnvioCorreo("Ranking Quiniela " + DateTime.Now.ToString(), htmlCuerpoCorreo);
+                                EnvioCorreo("Ranking Quiniela " + DateTime.Now.ToString(), htmlCuerpoCorreo);
                             }
                         }
                     }
@@ -295,26 +295,4 @@ namespace QuinielaAPP
             }
         }
     }
-
-    /*class Pronostico{
-        public string alias { get; set; }
-
-        public int id_alias { get; set; }
-
-        public int marcador1 { get; set; }
-
-        public int marcador2 { get; set; }
-
-        public int pa_marcador1 { get; set; }
-
-        public int pa_marcador2 { get; set; }
-
-        public string puntos { get; set; }
-
-        public string hora { get; set; }
-
-        public int CalculaPuntos(){
-            
-        }
-    }*/
 }
