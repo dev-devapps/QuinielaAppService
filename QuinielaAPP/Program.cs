@@ -2,7 +2,8 @@
 using System;
 using System.Configuration;
 using System.Data.SqlClient;
-
+using System.Xml;
+using MailKit.Net.Smtp;
 
 namespace QuinielaAPP
 {
@@ -14,13 +15,14 @@ namespace QuinielaAPP
         {
             Console.WriteLine("Iniciando...");
 
+            //EnvioCorreo("Prueba", "Mensaje de prueba :)");
 
             CambiaEstadoPartidos();
 
             ConsultaPartidoFinalizado();
 
 
-            Console.ReadKey(true);
+            //Console.ReadKey(true);
         }
 
 
@@ -257,10 +259,15 @@ namespace QuinielaAPP
 
         private static void EnvioCorreo(string asunto, string cuerpoMensaje){
             SMTPClass mail = new SMTPClass();
-            string resEnvioMail = "", query = "", correo = "", mensaje = "";
+            string resEnvioMail = "", query = "", correo = "", mensaje = "", listaCorreos = "";
+            bool firstTime = true;
 
-            mail.HOST = "";
-            mail.PORT = 25;
+            mail.HOST = "smtp.office365.com";
+            mail.PORT = 587;
+
+            mail.SMTP_USERNAME = "";
+            mail.SMTP_PASSWORD = "";
+            mail.ENABLESSL = true;
 
             mensaje = "<html>" +
                                 "<head>" +
@@ -280,17 +287,41 @@ namespace QuinielaAPP
 
                 query = "select us_correoElectronico from Usuario";
 
+                Console.WriteLine("Inicia el envio de correo " + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString());
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            correo = reader.GetString(0);
+                            if(firstTime){
+                                listaCorreos = reader.GetString(0);
+                                firstTime = false;
+                            }else{
+                                listaCorreos += "," + reader.GetString(0);
+                            }
 
-                            resEnvioMail = mail.SendMail("Quiniela Rusia 2018", "info@devapps.com", correo, "", "", asunto, true, mensaje, "");
+
+                            //resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", correo, "", "", asunto, true, mensaje, "");
+
+                            //Console.WriteLine("Correo enviado a " + correo + " " + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString());
                         }
                     }
+                }
+
+                resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", listaCorreos, "", "", asunto, true, mensaje, "");
+
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(resEnvioMail);
+
+                XmlNode errorNode = xmlDoc.DocumentElement.SelectSingleNode("/envio_correo/resultado");
+
+                string errorCode = errorNode.Attributes["codigo"].Value;
+                string errorMessage = errorNode.InnerText;
+
+                if(errorCode != "1"){
+                    Console.WriteLine("Error en el envío de correo: " + errorMessage);
                 }
             }
         }

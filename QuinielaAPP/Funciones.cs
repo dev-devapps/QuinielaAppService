@@ -48,6 +48,7 @@ namespace QuinielaAPP
 
             try
             {
+
                 MailAddress mailFrom = new MailAddress(strFrom, strDisplayName);
                 MailAddressCollection mailTo = new MailAddressCollection();
                 System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
@@ -55,8 +56,11 @@ namespace QuinielaAPP
 
                 System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient(HOST, PORT);
 
-                if (!SMTP_USERNAME.Equals(""))
-                    client.Credentials = new System.Net.NetworkCredential(SMTP_USERNAME, SMTP_PASSWORD);
+                if (!SMTP_USERNAME.Equals("")){
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new System.Net.NetworkCredential(SMTP_USERNAME, SMTP_PASSWORD, "");
+
+                }
 
                 client.EnableSsl = ENABLESSL;
 
@@ -145,7 +149,6 @@ namespace QuinielaAPP
                 }
 
                 client.Send(message);
-                lResult = "1 - Email sent!";
 
                 strResultado = "<envio_correo>" +
                                     "<resultado codigo=\"1\">Envio de correo exitoso.</resultado>" +
