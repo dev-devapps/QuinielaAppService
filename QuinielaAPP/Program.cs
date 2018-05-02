@@ -3,7 +3,6 @@ using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Xml;
-using MailKit.Net.Smtp;
 
 namespace QuinielaAPP
 {
@@ -20,7 +19,6 @@ namespace QuinielaAPP
             CambiaEstadoPartidos();
 
             ConsultaPartidoFinalizado();
-
 
             //Console.ReadKey(true);
         }
@@ -45,13 +43,14 @@ namespace QuinielaAPP
                     {
                         command.ExecuteNonQuery();
                         Console.WriteLine("Actualizacion exitosa! :)");
+                        Console.WriteLine(" ");
                     }
 
                     query = "select pa_id, E1.eq_descripcion 'Equipo1', E2.eq_descripcion 'Equipo1' from Partido, Equipo as E1, Equipo as E2 where pa_estado = 'C' and E1.eq_id = pa_idEquipo1 and E2.eq_id = pa_idEquipo2 and pa_hora_pronostico is null";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (SqlCommand command2 = new SqlCommand(query, connection))
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = command2.ExecuteReader())
                         {
                             int idPartido = 0;
                             string equipo1 = "", equipo2 = "", htmlCuerpoCorreo = "";
@@ -65,6 +64,7 @@ namespace QuinielaAPP
 
                                 htmlCuerpoCorreo = ArmaHTMLPronostico(idPartido, equipo1, equipo2);
 
+                                Console.WriteLine("Enviando pronosticos de: " + equipo1 + " vs. " + equipo2);
                                 EnvioCorreo("Pronosticos " + equipo1 + " vs. " + equipo2, htmlCuerpoCorreo);
                             }
                         }
@@ -93,13 +93,13 @@ namespace QuinielaAPP
                 query = "EXEC sp_tabla_pronostico @idPartido";
 
 
-                using (SqlCommand cmMarcador = new SqlCommand(query, connection))
+                using (SqlCommand cmPronostico = new SqlCommand(query, connection))
                 {
 
-                    cmMarcador.Parameters.AddWithValue("@idPartido", idPartido);
-                    SqlDataReader rMarcadores = cmMarcador.ExecuteReader();
+                    cmPronostico.Parameters.AddWithValue("@idPartido", idPartido);
 
-                    htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
+                    using(SqlDataReader rMarcadores = cmPronostico.ExecuteReader()){
+                        htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
                       "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#0B0B3B;\">" +
                         "<td align=\"center\">Alias</td>" +
                         "<td align=\"center\">" + equipo1 + "</td>" +
@@ -107,38 +107,46 @@ namespace QuinielaAPP
                         "<td align=\"center\">Fecha</td>" +
                       "</tr>";
 
-                    while (rMarcadores.Read())
-                    {
-
-                        if ((cont % 2) == 0)
+                        while (rMarcadores.Read())
                         {
-                            trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
-                        }
-                        else
-                        {
-                            trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+
+                            if ((cont % 2) == 0)
+                            {
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
+                            }
+                            else
+                            {
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+                            }
+
+                            htmlPronosticos += "<tr style=\"" + trClass + "\">" +
+                                                       "<td>" + rMarcadores.GetString(1) + "</td>" +
+                                                       "<td align=\"center\">" + (rMarcadores.GetInt32(2) == -1 ? "-" : rMarcadores.GetInt32(2).ToString()) + "</td>" +
+                                                       "<td align=\"center\">" + (rMarcadores.GetInt32(3) == -1 ? "-" : rMarcadores.GetInt32(3).ToString()) + "</td>" +
+                                                       "<td align=\"center\">" + (rMarcadores.GetInt32(3) == -1 ? "-" : rMarcadores.GetString(4) + " " + rMarcadores.GetString(5)) + "</td>" +
+                                                "</tr>";
+
+                            cont++;
                         }
 
-                        htmlPronosticos += "<tr style=\"" + trClass + "\">" +
-                                                   "<td>" + rMarcadores.GetString(1) + "</td>" +
-                                                   "<td align=\"center\">" + (rMarcadores.GetInt32(2) == -1 ? "-" : rMarcadores.GetInt32(2).ToString()) + "</td>" +
-                                                   "<td align=\"center\">" + (rMarcadores.GetInt32(3) == -1 ? "-" : rMarcadores.GetInt32(3).ToString()) + "</td>" +
-                                                   "<td align=\"center\">" + (rMarcadores.GetInt32(3) == -1 ? "-" : rMarcadores.GetString(4) + " " + rMarcadores.GetString(5)) + "</td>" +
-                                            "</tr>";
-
-                        cont++;
+                        htmlPronosticos += "</table>";
                     }
 
-                    htmlPronosticos += "</table>";
                 }
 
-                query = "update Partido set pa_hora_pronostico = GETDATE() where pa_id = @idPartido";
+                try{
+                    query = "update Partido set pa_hora_pronostico = GETDATE() where pa_id = @idPartido";
 
-                using(SqlCommand cmActualiza = new SqlCommand(query, connection)){
-                    cmActualiza.Parameters.AddWithValue("@idPartido", idPartido);
+                    using (SqlCommand cmActualizaPronostico = new SqlCommand(query, connection))
+                    {
+                        cmActualizaPronostico.Parameters.AddWithValue("@idPartido", idPartido);
 
-                    cmActualiza.ExecuteNonQuery();
+                        cmActualizaPronostico.ExecuteNonQuery();
+                    }
+                }catch(Exception e){
+                    Console.WriteLine("Ocurrio un error: " + e.Message);
                 }
+
             }
 
 
@@ -161,9 +169,9 @@ namespace QuinielaAPP
 
                     string query = "select pa_id from Partido where pa_estado = 'T' and pa_hora_ranking is null";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (SqlCommand command3 = new SqlCommand(query, connection))
                     {
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = command3.ExecuteReader())
                         {
                             int idPartido = 0;
                             string htmlCuerpoCorreo = "";
@@ -175,6 +183,7 @@ namespace QuinielaAPP
 
                                 htmlCuerpoCorreo = ArmaHTMLRanking();
 
+                                Console.WriteLine("Enviando correo de ranking");
                                 EnvioCorreo("Ranking Quiniela " + DateTime.Now.ToString(), htmlCuerpoCorreo);
                             }
                         }
@@ -202,11 +211,10 @@ namespace QuinielaAPP
 
                 query = "EXEC sp_tabla_ranking";
 
-                using (SqlCommand cmMarcador = new SqlCommand(query, connection))
+                using (SqlCommand cmRanking = new SqlCommand(query, connection))
                 {
-                    SqlDataReader rMarcadores = cmMarcador.ExecuteReader();
-
-                    htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
+                    using(SqlDataReader rMarcadoresR = cmRanking.ExecuteReader()){
+                        htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
                       "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#0B0B3B;\">" +
                         "<td align=\"center\">No.</td>" +
                         "<td align=\"center\">Posici&oacute;n</td>" +
@@ -214,34 +222,37 @@ namespace QuinielaAPP
                         "<td align=\"center\">Puntos</td>" +
                       "</tr>";
 
-                    while (rMarcadores.Read())
-                    {
-
-                        if ((cont % 2) == 0)
+                        while (rMarcadoresR.Read())
                         {
-                            trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
-                        }
-                        else
-                        {
-                            trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+
+                            if ((cont % 2) == 0)
+                            {
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
+                            }
+                            else
+                            {
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+                            }
+
+                            if (rMarcadoresR.GetInt32(1) == puntosAnt)
+                            {
+                                puntosAnt = rMarcadoresR.GetInt32(1);
+                                ranking++;
+                            }
+
+                            htmlPronosticos += "<tr style=\"" + trClass + "\">" +
+                                                       "<td>" + (cont + 1) + "</td>" +
+                                                       "<td align=\"center\">" + ranking + "</td>" +
+                                                       "<td align=\"center\">" + rMarcadoresR.GetString(0) + "</td>" +
+                                                       "<td align=\"center\">" + rMarcadoresR.GetInt32(1) + "</td>" +
+                                                "</tr>";
+
+                            cont++;
                         }
 
-                        if(rMarcadores.GetInt32(1) == puntosAnt){
-                            puntosAnt = rMarcadores.GetInt32(1);
-                            ranking++;
-                        }
-
-                        htmlPronosticos += "<tr style=\"" + trClass + "\">" +
-                                                   "<td>" + (cont + 1) + "</td>" +
-                                                   "<td align=\"center\">" + ranking + "</td>" +
-                                                   "<td align=\"center\">" + rMarcadores.GetString(0) + "</td>" +
-                                                   "<td align=\"center\">" + rMarcadores.GetInt32(1) + "</td>" +
-                                            "</tr>";
-
-                        cont++;
+                        htmlPronosticos += "</table>";
                     }
 
-                    htmlPronosticos += "</table>";
                 }
 
                 query = "update Partido set pa_hora_ranking = GETDATE() where pa_estado = 'T' and pa_hora_ranking is null";
@@ -259,7 +270,7 @@ namespace QuinielaAPP
 
         private static void EnvioCorreo(string asunto, string cuerpoMensaje){
             SMTPClass mail = new SMTPClass();
-            string resEnvioMail = "", query = "", correo = "", mensaje = "", listaCorreos = "";
+            string resEnvioMail = "", query = "", mensaje = "", listaCorreos = "";
             bool firstTime = true;
 
             mail.HOST = "smtp.office365.com";
@@ -287,11 +298,11 @@ namespace QuinielaAPP
 
                 query = "select us_correoElectronico from Usuario";
 
-                Console.WriteLine("Inicia el envio de correo " + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString());
+                Console.WriteLine("Inicia el envio de correo... ");
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlCommand cmCorreos = new SqlCommand(query, connection))
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = cmCorreos.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -302,10 +313,6 @@ namespace QuinielaAPP
                                 listaCorreos += "," + reader.GetString(0);
                             }
 
-
-                            //resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", correo, "", "", asunto, true, mensaje, "");
-
-                            //Console.WriteLine("Correo enviado a " + correo + " " + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString());
                         }
                     }
                 }
@@ -320,8 +327,13 @@ namespace QuinielaAPP
                 string errorCode = errorNode.Attributes["codigo"].Value;
                 string errorMessage = errorNode.InnerText;
 
-                if(errorCode != "1"){
+                if(errorCode == "1"){
+                    Console.WriteLine("Envio de correo exitoso");
+                    Console.WriteLine(" ");
+                }else{
                     Console.WriteLine("Error en el envío de correo: " + errorMessage);
+                    Console.WriteLine("Destinatarios: " + listaCorreos);
+                    Console.WriteLine(" ");
                 }
             }
         }
