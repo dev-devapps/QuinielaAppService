@@ -276,8 +276,8 @@ namespace QuinielaAPP
             mail.HOST = "smtp.office365.com";
             mail.PORT = 587;
 
-            mail.SMTP_USERNAME = "info@devappsgt.com";
-            mail.SMTP_PASSWORD = "N@sh_2018";
+            mail.SMTP_USERNAME = "";
+            mail.SMTP_PASSWORD = "";
             mail.ENABLESSL = true;
 
             mensaje = "<html>" +
