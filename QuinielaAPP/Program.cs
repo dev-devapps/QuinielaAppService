@@ -14,13 +14,9 @@ namespace QuinielaAPP
         {
             Console.WriteLine("Iniciando...");
 
-            //EnvioCorreo("Prueba", "Mensaje de prueba :)");
-
             CambiaEstadoPartidos();
 
             ConsultaPartidoFinalizado();
-
-            //Console.ReadKey(true);
         }
 
 
@@ -199,7 +195,7 @@ namespace QuinielaAPP
         private static string ArmaHTMLRanking()
         {
             string htmlPronosticos = "", query = "", trClass = "";
-            int cont = 0, ranking = 1, puntosAnt = 0;
+            int cont = 0, ranking = 0, puntosAnt = 0;
 
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.ConnectionString = ConfigurationManager.ConnectionStrings[SQLCONNSTRING].ConnectionString;
@@ -234,9 +230,13 @@ namespace QuinielaAPP
                                 trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
                             }
 
-                            if (rMarcadoresR.GetInt32(1) == puntosAnt)
+                            if (rMarcadoresR.GetInt32(1) != puntosAnt)
                             {
                                 puntosAnt = rMarcadoresR.GetInt32(1);
+                                ranking++;
+                            }
+
+                            if((cont == 0) && (ranking == 0)){
                                 ranking++;
                             }
 
@@ -276,8 +276,8 @@ namespace QuinielaAPP
             mail.HOST = "smtp.office365.com";
             mail.PORT = 587;
 
-            mail.SMTP_USERNAME = "";
-            mail.SMTP_PASSWORD = "";
+            mail.SMTP_USERNAME = "info@devappsgt.com";
+            mail.SMTP_PASSWORD = "N@sh_2018";
             mail.ENABLESSL = true;
 
             mensaje = "<html>" +
@@ -296,7 +296,7 @@ namespace QuinielaAPP
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString)){
                 connection.Open();
 
-                query = "select us_correoElectronico from Usuario";
+                query = "select us_correoElectronico from Usuario, AliasUsuario where us_id = al_idUsuario and us_estado = 'V' and al_estado = 'V' group by us_correoElectronico";
 
                 Console.WriteLine("Inicia el envio de correo... ");
 
@@ -317,7 +317,7 @@ namespace QuinielaAPP
                     }
                 }
 
-                resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", listaCorreos, "", "", asunto, true, mensaje, "");
+                resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", "info@devappsgt.com", "", listaCorreos, asunto, true, mensaje, "");
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(resEnvioMail);
