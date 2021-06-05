@@ -3,6 +3,7 @@ using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Xml;
+using System.Configuration;
 
 namespace QuinielaAPP
 {
@@ -78,6 +79,8 @@ namespace QuinielaAPP
             string htmlPronosticos = "", query = "", trClass = "";
             int cont = 0;
 
+            string bg = ConfigurationManager.AppSettings["BackgroundColor"].ToString(), trPar = ConfigurationManager.AppSettings["trPar"].ToString(), trImpar = ConfigurationManager.AppSettings["trImpar"].ToString();
+
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.ConnectionString = ConfigurationManager.ConnectionStrings[SQLCONNSTRING].ConnectionString;
 
@@ -96,11 +99,11 @@ namespace QuinielaAPP
 
                     using(SqlDataReader rMarcadores = cmPronostico.ExecuteReader()){
                         htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
-                      "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#0B0B3B;\">" +
+                      "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#" + bg +";\">" +
                         "<td align=\"center\">Alias</td>" +
                         "<td align=\"center\">" + equipo1 + "</td>" +
                         "<td align=\"center\">" + equipo2 + "</td>" +
-                        "<td align=\"center\">Fecha</td>" +
+                        "<td align=\"center\">Ingreso Pron&oacute;stico</td>" +
                       "</tr>";
 
                         while (rMarcadores.Read())
@@ -108,11 +111,11 @@ namespace QuinielaAPP
 
                             if ((cont % 2) == 0)
                             {
-                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#" + trPar + ";";
                             }
                             else
                             {
-                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#" + trImpar + ";";
                             }
 
                             htmlPronosticos += "<tr style=\"" + trClass + "\">" +
@@ -197,6 +200,8 @@ namespace QuinielaAPP
             string htmlPronosticos = "", query = "", trClass = "";
             int cont = 0, ranking = 0, puntosAnt = 0;
 
+            string bg = ConfigurationManager.AppSettings["BackgroundColor"].ToString(), trPar = ConfigurationManager.AppSettings["trPar"].ToString(), trImpar = ConfigurationManager.AppSettings["trImpar"].ToString();
+
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.ConnectionString = ConfigurationManager.ConnectionStrings[SQLCONNSTRING].ConnectionString;
 
@@ -211,7 +216,7 @@ namespace QuinielaAPP
                 {
                     using(SqlDataReader rMarcadoresR = cmRanking.ExecuteReader()){
                         htmlPronosticos = "<table align=\"center\" cellpadding=\"2\" cellspacing=\"2\" border=\"0\">" +
-                      "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#0B0B3B;\">" +
+                      "<tr style=\"font-family:Verdana;font-size:11px;font-weight: bold;padding:0px 10px 0px 0px;color:#FFFFFF;background-color:#" + bg + ";\">" +
                         "<td align=\"center\">No.</td>" +
                         "<td align=\"center\">Posici&oacute;n</td>" +
                         "<td align=\"center\">Alias</td>" +
@@ -223,11 +228,11 @@ namespace QuinielaAPP
 
                             if ((cont % 2) == 0)
                             {
-                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#1E5E9E;";
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#" + trPar + ";";
                             }
                             else
                             {
-                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#58ACFA;";
+                                trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#" + trImpar + ";";
                             }
 
                             if (rMarcadoresR.GetInt32(1) != puntosAnt)
@@ -272,12 +277,14 @@ namespace QuinielaAPP
             SMTPClass mail = new SMTPClass();
             string resEnvioMail = "", query = "", mensaje = "", listaCorreos = "";
             bool firstTime = true;
+            string c = ConfigurationManager.AppSettings["C"].ToString(), p = ConfigurationManager.AppSettings["P"].ToString(), s = ConfigurationManager.AppSettings["S"].ToString();
+            int po = Int32.Parse(ConfigurationManager.AppSettings["PO"].ToString());
 
-            mail.HOST = "smtp.office365.com";
-            mail.PORT = 587;
+            mail.HOST = s;
+            mail.PORT = po;
 
-            mail.SMTP_USERNAME = "";
-            mail.SMTP_PASSWORD = "";
+            mail.SMTP_USERNAME = c;
+            mail.SMTP_PASSWORD = p;
             mail.ENABLESSL = true;
 
             mensaje = "<html>" +
@@ -317,7 +324,7 @@ namespace QuinielaAPP
                     }
                 }
 
-                resEnvioMail = mail.SendMail("DevApps", "info@devappsgt.com", "info@devappsgt.com", "", listaCorreos, asunto, true, mensaje, "");
+                resEnvioMail = mail.SendMail("DevApps", c, c, "", listaCorreos, asunto, true, mensaje, "");
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(resEnvioMail);
