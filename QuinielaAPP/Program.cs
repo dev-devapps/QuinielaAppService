@@ -166,7 +166,7 @@ namespace QuinielaAPP
                 {
                     connection.Open();
 
-                    string query = "select pa_id from Partido where pa_estado = 'T' and pa_hora_ranking is null";
+                    string query = "select top 1 pa_id from Partido where pa_estado = 'T' and pa_hora_ranking is null";
 
                     using (SqlCommand command3 = new SqlCommand(query, connection))
                     {
