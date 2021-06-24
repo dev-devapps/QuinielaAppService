@@ -149,6 +149,8 @@ namespace QuinielaAPP
             }
 
 
+            htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
+
 
             return htmlPronosticos;
         }
@@ -268,7 +270,7 @@ namespace QuinielaAPP
                 }
             }
 
-
+            htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
             return htmlPronosticos;
         }
