@@ -3,7 +3,6 @@ using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Xml;
-using System.Configuration;
 
 namespace QuinielaAPP
 {

@@ -1,0 +1,27 @@
+﻿<Properties StartupConfiguration="{762683D8-3E7E-4914-8954-DB5F103CD822}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="QuinielaAPP/app.config">
+    <Files>
+      <File FileName="QuinielaAPP/Program.cs" Line="245" Column="1" />
+      <File FileName="QuinielaAPP/app.config" Line="21" Column="1" />
+      <File FileName="QuinielaAPP/Funciones.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="QuinielaAPP" expanded="True">
+            <Node name="QuinielaAPP" expanded="True">
+              <Node name="app.config" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.QuinielaAPP PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
