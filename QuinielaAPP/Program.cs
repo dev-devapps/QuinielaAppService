@@ -174,7 +174,7 @@ namespace QuinielaAPP
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
             //Discord
-            pronosticosD += "\n@everyone";
+            pronosticosD += "\n@participante @admin";
 
             SendMessageDiscord(pronosticosD, tituloPronostico, ConfigurationManager.AppSettings[URL_WEBHOOK_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
             //Discord
@@ -287,10 +287,13 @@ namespace QuinielaAPP
                                 case 3:
                                     rankingD += ":third_place: ";
                                     break;
+                                default:
+                                    rankingD += "Posición " + ranking + " ";
+                                    break;
                             }
 
 
-                            rankingD += ranking + " " + rMarcadoresR.GetString(0) + " " + rMarcadoresR.GetInt32(1) + "\n";
+                            rankingD += rMarcadoresR.GetString(0) + " con " + rMarcadoresR.GetInt32(1) + " puntos.\n";
 
                             htmlPronosticos += "<tr style=\"" + trClass + "\">" +
                                                        "<td>" + (cont + 1) + "</td>" +
@@ -318,7 +321,7 @@ namespace QuinielaAPP
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
             //Discord
-            rankingD += "\n@everyone";
+            rankingD += "\n@participante @admin";
 
             SendMessageDiscord(rankingD, "Ranking", ConfigurationManager.AppSettings[URL_WEBHOOK_RANKING].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_RANKING].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
             //Discord
