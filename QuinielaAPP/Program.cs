@@ -3,12 +3,21 @@ using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Xml;
+using DiscordMessenger;
 
 namespace QuinielaAPP
 {
     class MainClass
     {
         public const string SQLCONNSTRING = "SQLConnString";
+        public const string URL_AVATAR = "Avatar_D";
+        public const string BOT_PRONOSTICOS = "BP";
+        public const string BOT_RANKING = "BR";
+        public const string URL_WEBHOOK_PRONOSTICOS = "UWH_P";
+        public const string URL_WEBHOOK_RANKING = "UWH_R";
+        public const string URL_INVITACION = "UI";
+        public const string COLOR_PRONOSTICO = "C_P";
+        public const string COLOR_RANKING = "C_R";
 
         public static void Main(string[] args)
         {
@@ -77,6 +86,7 @@ namespace QuinielaAPP
         {
             string htmlPronosticos = "", query = "", trClass = "";
             int cont = 0;
+            string pronosticosD = "", tituloPronostico = "";
 
             string bg = ConfigurationManager.AppSettings["BackgroundColor"].ToString(), trPar = ConfigurationManager.AppSettings["trPar"].ToString(), trImpar = ConfigurationManager.AppSettings["trImpar"].ToString();
 
@@ -105,6 +115,8 @@ namespace QuinielaAPP
                         "<td align=\"center\">Ingreso Pron&oacute;stico</td>" +
                       "</tr>";
 
+                        tituloPronostico = equipo1 + " vrs. " + equipo2;
+
                         while (rMarcadores.Read())
                         {
 
@@ -116,6 +128,17 @@ namespace QuinielaAPP
                             {
                                 trClass = "font-family:Verdana;font-size:11px;padding:0px 5px 0px 0px;color:#FFFFFF;background-color:#" + trImpar + ";";
                             }
+
+
+                            if(rMarcadores.GetInt32(3) == -1)
+                            {
+                                pronosticosD += rMarcadores.GetString(1) + ": No ingresó pronósticos :smiling_face_with_tear:\n";
+                            }
+                            else
+                            {
+                                pronosticosD += rMarcadores.GetString(1) + ": " + rMarcadores.GetInt32(2).ToString() + " - " + rMarcadores.GetInt32(3).ToString() + " (" + rMarcadores.GetString(4) + " " + rMarcadores.GetString(5) + ")\n";
+                            }
+
 
                             htmlPronosticos += "<tr style=\"" + trClass + "\">" +
                                                        "<td>" + rMarcadores.GetString(1) + "</td>" +
@@ -150,6 +173,11 @@ namespace QuinielaAPP
 
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
+            //Discord
+            pronosticosD += "\n@everyone";
+
+            SendMessageDiscord(pronosticosD, tituloPronostico, ConfigurationManager.AppSettings[URL_WEBHOOK_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
+            //Discord
 
             return htmlPronosticos;
         }
@@ -203,6 +231,8 @@ namespace QuinielaAPP
 
             string bg = ConfigurationManager.AppSettings["BackgroundColor"].ToString(), trPar = ConfigurationManager.AppSettings["trPar"].ToString(), trImpar = ConfigurationManager.AppSettings["trImpar"].ToString();
 
+            string rankingD = "";
+
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             builder.ConnectionString = ConfigurationManager.ConnectionStrings[SQLCONNSTRING].ConnectionString;
 
@@ -246,6 +276,22 @@ namespace QuinielaAPP
                                 ranking++;
                             }
 
+                            switch (ranking)
+                            {
+                                case 1:
+                                    rankingD += ":first_place: ";
+                                    break;
+                                case 2:
+                                    rankingD += ":second_place: ";
+                                    break;
+                                case 3:
+                                    rankingD += ":third_place: ";
+                                    break;
+                            }
+
+
+                            rankingD += ranking + " " + rMarcadoresR.GetString(0) + " " + rMarcadoresR.GetInt32(1) + "\n";
+
                             htmlPronosticos += "<tr style=\"" + trClass + "\">" +
                                                        "<td>" + (cont + 1) + "</td>" +
                                                        "<td align=\"center\">" + ranking + "</td>" +
@@ -270,6 +316,12 @@ namespace QuinielaAPP
             }
 
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
+
+            //Discord
+            rankingD += "\n@everyone";
+
+            SendMessageDiscord(rankingD, "Ranking", ConfigurationManager.AppSettings[URL_WEBHOOK_RANKING].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_RANKING].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
+            //Discord
 
             return htmlPronosticos;
         }
@@ -344,6 +396,33 @@ namespace QuinielaAPP
                     Console.WriteLine(" ");
                 }
             }
+        }
+
+        private static void SendMessageDiscord(string mensaje, string titulo, string urlWebhook, string urlAvatar, string botName, string urlInvite)
+        {
+            try
+            {
+
+                new DiscordMessage()
+                    .SetUsername(botName)
+                    .SetAvatar(urlAvatar)
+                    .AddEmbed()
+                        .SetTimestamp(DateTime.UtcNow)
+                        .SetTitle(titulo)
+                        .SetAuthor("Dev Apps", urlInvite, urlAvatar)
+                        .SetDescription(mensaje)
+                        .SetColor(1)
+                        .SetFooter("Este mensajes es generado automáticamente por nuestros bots", urlAvatar)
+                        .Build()
+                        .SendMessage(urlWebhook);
+
+                Console.WriteLine("Mensaje a Discord enviado.");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Error en el envío de la notificacion a Discord: " + e.Message);
+            }
+            
         }
     }
 }

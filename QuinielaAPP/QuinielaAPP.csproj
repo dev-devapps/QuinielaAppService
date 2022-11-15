@@ -56,6 +56,12 @@
     <Reference Include="MailKit">
       <HintPath>..\packages\MailKit.2.8.0\lib\net46\MailKit.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="DiscordMessenger">
+      <HintPath>..\packages\DiscordMessenger.2.0.2\lib\netstandard2.0\DiscordMessenger.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
