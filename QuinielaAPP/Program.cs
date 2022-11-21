@@ -2,6 +2,9 @@
 using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Xml;
 using DiscordMessenger;
 
@@ -132,11 +135,11 @@ namespace QuinielaAPP
 
                             if(rMarcadores.GetInt32(3) == -1)
                             {
-                                pronosticosD += rMarcadores.GetString(1) + ": No ingresó pronósticos :smiling_face_with_tear:\n";
+                                pronosticosD += "**" + rMarcadores.GetString(1) + "**: No ingresó pronósticos :smiling_face_with_tear:\\n";
                             }
                             else
                             {
-                                pronosticosD += rMarcadores.GetString(1) + ": " + rMarcadores.GetInt32(2).ToString() + " - " + rMarcadores.GetInt32(3).ToString() + " (" + rMarcadores.GetString(4) + " " + rMarcadores.GetString(5) + ")\n";
+                                pronosticosD += "**" + rMarcadores.GetString(1) + "**: " + rMarcadores.GetInt32(2).ToString() + " - " + rMarcadores.GetInt32(3).ToString() + " (" + rMarcadores.GetString(4) + " " + rMarcadores.GetString(5) + ")\\n";
                             }
 
 
@@ -174,8 +177,6 @@ namespace QuinielaAPP
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
             //Discord
-            pronosticosD += "\n@participante @admin";
-
             SendMessageDiscord(pronosticosD, tituloPronostico, ConfigurationManager.AppSettings[URL_WEBHOOK_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_PRONOSTICOS].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
             //Discord
 
@@ -293,7 +294,7 @@ namespace QuinielaAPP
                             }
 
 
-                            rankingD += rMarcadoresR.GetString(0) + " con " + rMarcadoresR.GetInt32(1) + " puntos.\n";
+                            rankingD += "**" + rMarcadoresR.GetString(0) + "** con " + rMarcadoresR.GetInt32(1) + " puntos.\\n";
 
                             htmlPronosticos += "<tr style=\"" + trClass + "\">" +
                                                        "<td>" + (cont + 1) + "</td>" +
@@ -321,8 +322,6 @@ namespace QuinielaAPP
             htmlPronosticos += "<br /><br />Recuerda que puedes ingresar al portal haciendo clic <a href =\"" + ConfigurationManager.AppSettings["HOME"].ToString() + "\">aqu&iacute;</a>.";
 
             //Discord
-            rankingD += "\n@participante @admin";
-
             SendMessageDiscord(rankingD, "Ranking", ConfigurationManager.AppSettings[URL_WEBHOOK_RANKING].ToString(), ConfigurationManager.AppSettings[URL_AVATAR].ToString(), ConfigurationManager.AppSettings[BOT_RANKING].ToString(), ConfigurationManager.AppSettings[URL_INVITACION].ToString());
             //Discord
 
@@ -405,27 +404,45 @@ namespace QuinielaAPP
         {
             try
             {
+                string jsonWH = "{" +
+                                    "\"content\": \"<@&1041795262349324299> <@&1041794788984369202>\"," +
+                                    "\"username\": \"" + botName + "\"," +
+                                    "\"avatar_url\": \"" + urlAvatar + "\"," +
+                                    "\"embeds\": [" +
+                                      "{" +
+                                        "\"title\": \"" + titulo + "\"," +
+                                        "\"description\": \"" + mensaje + "\"," +
+                                        "\"color\": 5814783," +
+                                        "\"footer\": {" +
+                                            "\"text\": \"Quiniela Qatar 2022\"," +
+                                            "\"icon_url\": \"" + urlAvatar + "\"" +
+                                        "}" +
+                                      "}" +
+                                    "]," +
+                                    "\"attachments\": []" +
+                "}";
 
-                new DiscordMessage()
-                    .SetUsername(botName)
-                    .SetAvatar(urlAvatar)
-                    .AddEmbed()
-                        .SetTimestamp(DateTime.UtcNow)
-                        .SetTitle(titulo)
-                        .SetAuthor("Dev Apps", urlInvite, urlAvatar)
-                        .SetDescription(mensaje)
-                        .SetColor(1)
-                        .SetFooter("Este mensajes es generado automáticamente por nuestros bots", urlAvatar)
-                        .Build()
-                        .SendMessage(urlWebhook);
 
-                Console.WriteLine("Mensaje a Discord enviado.");
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(urlWebhook);
+                httpWebRequest.ContentType = "application/json";
+                httpWebRequest.Method = "POST";
+
+                using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                {
+
+                    streamWriter.Write(jsonWH);
+                }
+
+                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("Error en el envío de la notificacion a Discord: " + e.Message);
             }
-            
         }
     }
 }
